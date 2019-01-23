@@ -5,7 +5,7 @@ namespace AzureFunctions.Extensions.Slack
 {
     [Binding]
     [AttributeUsage(AttributeTargets.ReturnValue | AttributeTargets.Parameter)]
-    public sealed class SlackBotAttribute : Attribute
+    public class SlackBotAttribute : Attribute
     {
 
         public SlackBotAttribute(string botUserOAuthAccessTokenKey, string channel)

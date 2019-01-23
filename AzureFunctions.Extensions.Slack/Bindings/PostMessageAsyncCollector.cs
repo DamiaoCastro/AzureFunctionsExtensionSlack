@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AzureFunctions.Extensions.Slack.Bindings
 {
-    internal class PostMessageAsyncCollector : IAsyncCollector<string>
+    internal class PostMessageAsyncCollector : IAsyncCollector<SlackMessage>
     {
 
         public PostMessageAsyncCollector(SlackBotAttribute slackBotAttribute)
@@ -18,19 +18,20 @@ namespace AzureFunctions.Extensions.Slack.Bindings
             this.slackBotAttribute = slackBotAttribute ?? throw new ArgumentNullException(nameof(slackBotAttribute));
         }
 
-        private List<string> messages = new List<string>();
+        private readonly List<SlackMessage> messages = new List<SlackMessage>();
         private readonly SlackBotAttribute slackBotAttribute;
 
-        Task IAsyncCollector<string>.AddAsync(string item, CancellationToken cancellationToken)
+        Task IAsyncCollector<SlackMessage>.AddAsync(SlackMessage item, CancellationToken cancellationToken)
         {
             messages.Add(item);
 
             return Task.CompletedTask;
         }
 
-        async Task IAsyncCollector<string>.FlushAsync(CancellationToken cancellationToken)
+        async Task IAsyncCollector<SlackMessage>.FlushAsync(CancellationToken cancellationToken)
         {
-            if (messages.All(c => string.IsNullOrWhiteSpace(c))) { return; }
+            if (!messages.Any()) { return; }
+            if (messages.All(c => c == null)) { return; }
 
             var botUserOAuthAccessToken = Environment.GetEnvironmentVariable(slackBotAttribute.BotUserOAuthAccessTokenKey, EnvironmentVariableTarget.Process);
 
@@ -38,22 +39,18 @@ namespace AzureFunctions.Extensions.Slack.Bindings
             {
                 httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", botUserOAuthAccessToken);
 
-                foreach (var message in messages)
+                foreach (var message in messages.Where(c => c != null))
                 {
-                    if (string.IsNullOrWhiteSpace(message)) { continue; }
 
-                    var objMessage = new
-                    {
-                        channel = slackBotAttribute.Channel,
-                        text = message,
-                        as_user = slackBotAttribute.AsUser
-                    };
-
-                    var messageText = JsonConvert.SerializeObject(objMessage);
+                    message.Channel = slackBotAttribute.Channel;
+                    message.AsUser = slackBotAttribute.AsUser;
+                    
+                    var messageText = JsonConvert.SerializeObject(message);
 
                     var content = new StringContent(messageText, Encoding.UTF8, "application/json");
 
-                    await httpClient.PostAsync("https://slack.com/api/chat.postMessage", content);
+                    var response = await httpClient.PostAsync("https://slack.com/api/chat.postMessage", content);
+                    response.EnsureSuccessStatusCode();
 
                 }
 

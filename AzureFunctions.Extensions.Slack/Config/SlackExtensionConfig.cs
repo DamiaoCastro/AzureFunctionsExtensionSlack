@@ -14,17 +14,29 @@ namespace AzureFunctions.Extensions.Slack.Config
         {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }
 
+            context.AddConverter<string, SlackMessage>(c => new SlackMessage() { Text = c });
+
             context
                 .AddBindingRule<SlackBotAttribute>()
                 .BindToCollector(BuildFromAttribute)
                 ;
 
+            context
+                .AddBindingRule<SlackBotFileUploadAttribute>()
+                .BindToCollector(BuildFromAttribute)
+                ;
+
         }
 
-        private IAsyncCollector<string> BuildFromAttribute(SlackBotAttribute slackBotAttribute)
+        private IAsyncCollector<SlackMessage> BuildFromAttribute(SlackBotAttribute slackBotAttribute)
         {
             return new PostMessageAsyncCollector(slackBotAttribute);
         }
-        
+
+        private IAsyncCollector<SlackFilesUpload> BuildFromAttribute(SlackBotFileUploadAttribute slackBotFileUploadAttribute)
+        {
+            return new FileUploadMessageAsyncCollector(slackBotFileUploadAttribute);
+        }
+
     }
 }
