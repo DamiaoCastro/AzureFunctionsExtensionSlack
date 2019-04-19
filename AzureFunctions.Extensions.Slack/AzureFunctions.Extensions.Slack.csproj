@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Damiao Castro</Authors>
-    <Version>1.0.0-beta2</Version>
+    <Version>1.0.1</Version>
     <PackageProjectUrl>https://github.com/DamiaoCastro/AzureFunctionsExtensionSlack/wiki</PackageProjectUrl>
     <Product />
     <Company>fowet.com</Company>
