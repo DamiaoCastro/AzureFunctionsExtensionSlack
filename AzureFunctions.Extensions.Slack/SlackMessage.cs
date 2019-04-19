@@ -26,6 +26,20 @@ namespace AzureFunctions.Extensions.Slack
             public string Color { get; set; }
             [JsonProperty("text")]
             public string Text { get; set; }
+            [JsonProperty("pretext")]
+            public bool Pretext { get; set; }
+            [JsonProperty("fields")]
+            public IEnumerable<SlackMessageAttachmentField> Fields { get; set; }
+
+            public class SlackMessageAttachmentField
+            {
+                [JsonProperty("title")]
+                public string Title { get; set; }
+                [JsonProperty("value")]
+                public string Value { get; set; }
+                [JsonProperty("short")]
+                public bool Short { get; set; }
+            }
         }
     }
 }
