@@ -27,7 +27,7 @@ namespace AzureFunctions.Extensions.Slack
             [JsonProperty("text")]
             public string Text { get; set; }
             [JsonProperty("pretext")]
-            public bool Pretext { get; set; }
+            public string Pretext { get; set; }
             [JsonProperty("fields")]
             public IEnumerable<SlackMessageAttachmentField> Fields { get; set; }
 
